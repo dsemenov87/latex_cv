@@ -1,0 +1,531 @@
+% vim: set textwidth=120:
+
+% Example CV based on the 1.5-column-cv template. Main features:
+% * uses the Roboto font family and IcoMoon icon set;
+% * doesn't use colours, different font weights are used instead for styling;
+% * because the CV fits on one page, header and footer is empty, since there isn't much useful info to put there;
+% * includes a photo.
+\documentclass[a4paper,10pt]{article}
+
+
+% package imports
+% ---------------
+
+\usepackage[british]{babel} % for correct language and hyphenation and stuff
+\usepackage{calc}           % for easier length calculations (infix notation)
+\usepackage{enumitem}       % for configuring list environments
+\usepackage{fancyhdr}       % for setting header and footer
+\usepackage{fontspec}       % for fonts
+\usepackage{geometry}       % for setting margins (\newgeometry)
+\usepackage{graphicx}       % for pictures
+\usepackage{microtype}      % for microtypography stuff
+\usepackage{xcolor}         % for colours
+
+
+% margin and column widths
+% ------------------------
+
+% margins
+\newgeometry{left=15mm,right=15mm,top=15mm,bottom=15mm}
+
+% width of the gap between left and right column
+\newlength{\cvcolumngapwidth}
+\setlength{\cvcolumngapwidth}{3.5mm}
+
+% left column width
+\newlength{\cvleftcolumnwidth}
+\setlength{\cvleftcolumnwidth}{44.5mm}
+
+% right column width
+\newlength{\cvrightcolumnwidth}
+\setlength{\cvrightcolumnwidth}{\textwidth-\cvleftcolumnwidth-\cvcolumngapwidth}
+
+% set paragraph indentation to 0, because it screws up the whole layout otherwise
+\setlength{\parindent}{0mm}
+
+
+% style definitions
+% -----------------
+% style categories explanation:
+% * \cvnameXXX is used for the name;
+% * \cvsectionXXX is used for section names (left column, accompanied by a horizontal rule);
+% * \cvtitleXXX is used for job/education titles (right column);
+% * \cvdurationXXX is used for job/education durations (left column);
+% * \cvheadingXXX is used for headings (left column);
+% * \cvmainXXX (and \setmainfont) is used for main text;
+% * \cvruleXXX is used for the horizontal rules denoting sections.
+
+% font families
+\defaultfontfeatures{Ligatures=TeX} % reportedly a good idea, see https://tex.stackexchange.com/a/37251
+
+\newfontfamily{\cvnamefont}{Roboto Medium}
+\newfontfamily{\cvsectionfont}{Roboto Medium}
+\newfontfamily{\cvtitlefont}{Roboto Regular}
+\newfontfamily{\cvdurationfont}{Roboto Light Italic}
+\newfontfamily{\cvheadingfont}{Roboto Regular}
+\setmainfont{Roboto Light}
+
+% colours
+\definecolor{cvnamecolor}{HTML}{000000}
+\definecolor{cvsectioncolor}{HTML}{000000}
+\definecolor{cvtitlecolor}{HTML}{000000}
+\definecolor{cvdurationcolor}{HTML}{000000}
+\definecolor{cvheadingcolor}{HTML}{000000}
+\definecolor{cvmaincolor}{HTML}{000000}
+\definecolor{cvrulecolor}{HTML}{000000}
+
+\color{cvmaincolor}
+
+% styles
+\newcommand{\cvnamestyle}[1]{{\Large\cvnamefont\textcolor{cvnamecolor}{#1}}}
+\newcommand{\cvsectionstyle}[1]{{\normalsize\cvsectionfont\textcolor{cvsectioncolor}{#1}}}
+\newcommand{\cvtitlestyle}[1]{{\large\cvtitlefont\textcolor{cvtitlecolor}{#1}}}
+\newcommand{\cvdurationstyle}[1]{{\small\cvdurationfont\textcolor{cvdurationcolor}{#1}}}
+\newcommand{\cvheadingstyle}[1]{{\normalsize\cvheadingfont\textcolor{cvheadingcolor}{#1}}}
+
+
+% inter-item spacing
+% ------------------
+
+% vertical space after personal info and standard CV items
+\newlength{\cvafteritemskipamount}
+\setlength{\cvafteritemskipamount}{5mm plus 1.25mm minus 1.25mm}
+
+% vertical space after sections
+\newlength{\cvaftersectionskipamount}
+\setlength{\cvaftersectionskipamount}{2mm plus 0.5mm minus 0.5mm}
+
+% extra vertical space to be used when a section starts with an item with a heading (e.g. in the skills section),
+% so that the heading does not follow the section name too closely
+\newlength{\cvbetweensectionandheadingextraskipamount}
+\setlength{\cvbetweensectionandheadingextraskipamount}{1mm plus 0.25mm minus 0.25mm}
+
+
+% intra-item spacing
+% ------------------
+
+% vertical space after name
+\newlength{\cvafternameskipamount}
+\setlength{\cvafternameskipamount}{3mm plus 0.75mm minus 0.75mm}
+
+% vertical space after personal info lines
+\newlength{\cvafterpersonalinfolineskipamount}
+\setlength{\cvafterpersonalinfolineskipamount}{2mm plus 0.5mm minus 0.5mm}
+
+% vertical space after titles
+\newlength{\cvaftertitleskipamount}
+\setlength{\cvaftertitleskipamount}{1mm plus 0.25mm minus 0.25mm}
+
+% value to be used as parskip in right column of CV items and itemsep in lists (same for both, for consistency)
+\newlength{\cvparskip}
+\setlength{\cvparskip}{0.5mm plus 0.125mm minus 0.125mm}
+
+% set global list configuration (use parskip as itemsep, and no separation otherwise)
+\setlist{parsep=0mm,topsep=0mm,partopsep=0mm,itemsep=\cvparskip}
+
+
+% CV commands
+% -----------
+
+% creates a "personal info" CV item with the given left and right column contents, with appropriate vertical space after
+% @param #1 left column content (should be the CV photo)
+% @param #2 right column content (should be the name and personal info)
+\newcommand{\cvpersonalinfo}[2]{
+    % left and right column
+    \begin{minipage}[t]{\cvleftcolumnwidth}
+        \vspace{0mm} % XXX hack to align to top, see https://tex.stackexchange.com/a/11632
+        \raggedleft #1
+    \end{minipage}% XXX necessary comment to avoid unwanted space
+    \hspace{\cvcolumngapwidth}% XXX necessary comment to avoid unwanted space
+    \begin{minipage}[t]{\cvrightcolumnwidth}
+        \vspace{0mm} % XXX hack to align to top, see https://tex.stackexchange.com/a/11632
+        #2
+    \end{minipage}
+
+    % space after
+    \vspace{\cvafteritemskipamount}
+}
+
+% typesets a name, with appropriate vertical space after
+% @param #1 name text
+\newcommand{\cvname}[1]{
+    % name
+    \cvnamestyle{#1}
+
+    % space after
+    \vspace{\cvafternameskipamount}
+}
+
+% typesets a line of personal info beginning with an icon, with appropriate vertical space after
+% @param #1 parameters for the \includegraphics command used to include the icon
+% @param #2 icon filename
+% @param #3 line text
+\newcommand{\cvpersonalinfolinewithicon}[3]{
+    % icon, vertically aligned with text (see https://tex.stackexchange.com/a/129463)
+    \raisebox{.5\fontcharht\font`E-.5\height}{\includegraphics[#1]{#2}}
+    % text
+    #3
+
+    % space after
+    \vspace{\cvafterpersonalinfolineskipamount}
+}
+
+% creates a "section" CV item with the given left column content, a horizontal rule in the right column, and with
+% appropriate vertical space after
+% @param #1 left column content (should be the section name)
+\newcommand{\cvsection}[1]{
+    % left and right column
+    \begin{minipage}[t]{\cvleftcolumnwidth}
+        \raggedleft\cvsectionstyle{#1}
+    \end{minipage}% XXX necessary comment to avoid unwanted space
+    \hspace{\cvcolumngapwidth}% XXX necessary comment to avoid unwanted space
+    \begin{minipage}[t]{\cvrightcolumnwidth}
+        \textcolor{cvrulecolor}{\rule{\cvrightcolumnwidth}{0.3mm}}
+    \end{minipage}
+
+    % space after
+    \vspace{\cvaftersectionskipamount}
+}
+
+% creates a standard, multi-purpose CV item with the given left and right column contents, parskip set to cvparskip
+% in the right column, and with appropriate vertical space after
+% @param #1 left column content
+% @param #2 right column content
+\newcommand{\cvitem}[2]{
+    % left and right column
+    \begin{minipage}[t]{\cvleftcolumnwidth}
+        \raggedleft #1
+    \end{minipage}% XXX necessary comment to avoid unwanted space
+    \hspace{\cvcolumngapwidth}% XXX necessary comment to avoid unwanted space
+    \begin{minipage}[t]{\cvrightcolumnwidth}
+        \setlength{\parskip}{\cvparskip} #2
+    \end{minipage}
+
+    % space after
+    \vspace{\cvafteritemskipamount}
+}
+
+% typesets a title, with appropriate vertical space after
+% @param #1 title text
+\newcommand{\cvtitle}[1]{
+    % title
+    \cvtitlestyle{#1}
+
+    % space after
+    \vspace{\cvaftertitleskipamount}
+    % XXX need to subtract cvparskip here, because it is automatically inserted after the title "paragraph"
+    \vspace{-\cvparskip}
+}
+
+
+% header and footer
+% -----------------
+
+% set empty header and footer
+\pagestyle{empty}
+
+
+
+% preamble end/document start
+% ===========================
+
+\begin{document}
+
+
+% personal info
+% -------------
+
+\cvpersonalinfo{
+    % photo
+    \includegraphics[height=36mm]{photo.png}
+}{
+    % name
+    \cvname{Devanshu Sapra}
+
+    % address
+    \cvpersonalinfolinewithicon{height=4mm}{072-location.pdf}{
+        Flat Number 40, Anupam Apartment, Vasundhara Enclave, Delhi-110096
+    }
+
+    % phone number
+    \cvpersonalinfolinewithicon{height=4mm}{067-phone.pdf}{
+        +91 96505\,69933\
+    }
+
+    % email address
+    \cvpersonalinfolinewithicon{height=4mm}{070-envelop.pdf}{
+        dsapra30@gmail.com
+    }
+
+    % LinkedIn account
+    \cvpersonalinfolinewithicon{height=4mm}{458-linkedin.pdf}{
+        devanshu-sapra-362085102
+    }
+
+    % date of birth
+    Born 30 September 1997
+}
+
+
+% work experience
+% ---------------
+
+\cvsection{WORK EXPERIENCE}
+
+% Fake Company 2
+\cvitem{
+    \cvdurationstyle{January 2019 -- present}
+}{
+    \cvtitle{Graduate Engineer Trainee}
+
+    NEC Technologies Pvt. Ltd., Sector 135, Noida, Uttar Pradesh
+
+    \begin{itemize}[leftmargin=*]
+        \item Working on Openshift, Kubernetes, GoLang and Openstack.
+    \end{itemize}
+}
+
+
+% education
+% ---------
+
+\cvsection{EDUCATION}
+
+% master's
+\cvitem{
+    \cvdurationstyle{2015 -- 2019}
+}{
+    \cvtitle{Bachelor of Technology (Computer Science and Engineering)}
+
+    From Amity School of Engineering and Technology, Amity University, Sector 125, Noida, Uttar Pradesh
+
+    \begin{itemize}[leftmargin=*]
+        \item Scored: 86.6\%
+    \end{itemize}
+}
+
+% bachelor's
+\cvitem{
+    \cvdurationstyle{2014 -- 2015}
+}{
+    \cvtitle{Senior Secondary(XII)}
+
+    From Salwan Public School
+
+    \begin{itemize}[leftmargin=*]
+        \item CBSE Board
+        \item Scored: 94.8\%
+        \item Scored 99\% in Mathematics
+    \end{itemize}
+}
+
+% bachelor's
+\cvitem{
+    \cvdurationstyle{2012 -- 2013}
+}{
+    \cvtitle{Senior Secondary(X)}
+
+    From Salwan Public School
+
+    \begin{itemize}[leftmargin=*]
+        \item CBSE Board
+        \item Scored: 91.2\%
+    \end{itemize}
+}
+
+% education
+% ---------
+
+\cvsection{Certifications}
+
+% master's
+\cvitem{
+    \cvdurationstyle{Dec 2018 -- July 2019}
+}{
+    \cvtitle{NPTEL Online Certification on “Introduction to IOT”}
+
+    \begin{itemize}[leftmargin=*]
+        \item Gold Medalist
+        \item Scored: 96\% 
+        
+    \end{itemize}
+}
+\cvitem{
+    \cvdurationstyle{Dec 2018 -- July 2019}
+}{
+    \cvtitle{NPTEL Online Certification on “Social Networking”}
+
+    \begin{itemize}[leftmargin=*]
+        \item Silver Medalist
+        \item Scored: 84\% 
+        
+    \end{itemize}
+}
+
+
+
+% skills
+% ------
+
+\cvsection{Technical skills}
+
+\vspace{\cvbetweensectionandheadingextraskipamount}
+
+\cvitem{
+    \cvheadingstyle{Programming Languages}
+}{
+    
+    \begin{itemize}
+    \item GoLang (Currently working)
+    \item Python
+        \item Java
+         \item C/C++
+          \item HTML
+           \item CSS
+            
+            
+    \end{itemize}
+
+    
+}
+\cvitem{
+    \cvheadingstyle{Frameworks}
+}{
+    
+    \begin{itemize}
+        \item Bootstrap
+        \item Openshift Framework
+    \end{itemize}
+
+    
+}
+
+\cvitem{
+    \cvheadingstyle{Databases}
+}{
+    
+    \begin{itemize}
+        \item SQL(H2 Database)
+    \end{itemize}
+
+    
+}
+
+\cvitem{
+    \cvheadingstyle{Technologies worked with}
+}{
+    
+    \begin{itemize}
+        \item Docker
+        \item Kubernetes
+        \item Openstack
+        \item Openshift
+    \end{itemize}
+
+    
+}
+
+
+\cvsection{Projects}
+
+\vspace{\cvbetweensectionandheadingextraskipamount}
+
+\cvitem{
+    \cvdurationstyle{July 2017 -- August 2017}
+}{
+    \cvtitle{Voice Innovation Project using Alexa and Google Assistant}
+
+    \begin{itemize}[leftmargin=*]
+        \item An interactive chat bot which responds to the client's questions. Used Amazon Web services and Alexa Technology to develop a chat bot.
+        
+    \end{itemize}
+}
+
+\cvitem{
+    \cvdurationstyle{May 2018 -- July 2018}
+}{
+    \cvtitle{Checking the vulnerability of secure communication between two machines to side channel attacks}
+    Under \textbf{Defence Research and Development Organization (DRDO)}
+    \begin{itemize}[leftmargin=*]
+        \item It comprised mainly of cryptanalysis and IoT. Two arduinos were used to set up an I2C communication between two systems and plain text was sent from one side after encryption and decrypted on the other side. Motive was to check if there’s any leakage using graph, i.e. if the set-up is safe or not.
+        
+    \end{itemize}
+}
+
+
+\cvsection{Personal skills}
+
+\vspace{\cvbetweensectionandheadingextraskipamount}
+
+\cvitem{
+    \cvheadingstyle{Strengths}
+}{
+    
+    \begin{itemize}
+        \item Strong motivational and leadership skills.
+        \item Ability to work under pressure.
+        \item Ability to work individually as well as in a team.
+        \item Excellent logical, analytical and computational skills.
+        \item Positive attitude.
+    \end{itemize}
+
+    
+}
+
+
+% languages
+\cvitem{
+    \cvheadingstyle{Languages Known}
+}{
+    
+    \begin{itemize}
+        \item English : Read, Write, Speak
+         \item Hindi : Read, Write, Speak
+          \item French : Read, Write
+    \end{itemize}
+
+
+}
+
+\cvsection{Extra Curricular activities}
+
+\vspace{\cvbetweensectionandheadingextraskipamount}
+
+\cvitem{
+    \cvheadingstyle{}
+}{
+    
+    \begin{itemize}
+        \item Leaded and managed three workshops on HTML, CSS, BOOTSTRAP under IEEE department.
+        \item Managed the Confluence pertaining to Cloud Computing, Data Science and Engineering.
+       
+    \end{itemize}
+
+    
+}
+
+% additional info
+% ---------------
+
+\cvsection{Achievements}
+
+\vspace{\cvbetweensectionandheadingextraskipamount}
+
+% driving licence
+\cvitem{
+    \cvheadingstyle{}
+}{
+     \begin{itemize}
+        \item Consistently maintained 100\% Ashok K. Chauhan scholarship for continuous four years during B.Tech.
+     \item Received Letter of Recommendation from DRDO signed by Scientist "G".
+ \item Issued a certificate by the DRDO with regard to completion of my training successfully.
+ \item Certiport Certificate by Microsoft Specialist in MS Word 2007.
+ \item Third Position Holder in Web Designing Competition in Amity Youth Fest,2017.
+ \item Certified in Digital Transformation Course from NIIT.
+ \item Certificate of Achievement- Successfully completing the Voice Innovation Project (using Alexa and Google Assistant) under MRS
+
+    \end{itemize}
+}
+
+
+\end{document}
